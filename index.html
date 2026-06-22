@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>README — การใช้ Google Sheets เป็นฐานข้อมูลร่วมกับ Google Apps Script Backend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg:        #fff8f0;
+      --surface:   #ffffff;
+      --dark:      #1c0a00;
+      --accent:    #ea580c;
+      --accent2:   #f97316;
+      --accent3:   #fed7aa;
+      --muted:     #78716c;
+      --border:    #fed7aa;
+      --code-bg:   #fff7ed;
+      --code-fg:   #431407;
+      --cm:        #a16207;
+      --tg:        #c2410c;
+      --at:        #0369a1;
+      --st:        #166534;
+      --vl:        #7c3aed;
+      --pr:        #b45309;
+      --sl:        #0891b2;
+      --radius:    10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--dark); line-height: 1.85; font-size: 15px; }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #7c2d12 0%, #c2410c 55%, #ea580c 100%);
+      color: #fff;
+      padding: 36px 60px;
+      border-bottom: 4px solid #7c2d12;
+      display: flex; align-items: center; gap: 20px;
+    }
+    header .icon { font-size: 44px; color: #fed7aa; }
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.35); }
+    header p  { font-size: 13px; color: #fed7aa; }
+    header .badge {
+      margin-left: auto;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* LAYOUT */
+    main { max-width: 960px; margin: 36px auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 28px; }
+
+    /* NAV PILLS */
+    .nav-pills {
+      display: flex; gap: 8px; flex-wrap: wrap; background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px;
+      box-shadow: 0 2px 8px rgba(234,88,12,.08);
+    }
+    .nav-pill {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: 20px;
+      padding: 5px 14px; font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600;
+      transition: background .15s, color .15s;
+    }
+    .nav-pill:hover { background: var(--accent); color: #fff; }
+
+    /* SECTION */
+    .section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: 0 2px 14px rgba(234,88,12,.07);
+      border: 1px solid #fed7aa;
+    }
+    .section-title {
+      font-size: 16px; font-weight: 700; color: var(--dark);
+      border-left: 4px solid var(--accent); padding-left: 12px;
+      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-title.blue { border-color: #2563eb; }
+    .section-title.amber { border-color: #d97706; }
+    .section-title.green { border-color: #16a34a; }
+    .section-title i { color: var(--accent); font-size: 15px; }
+    .section-title.blue i { color: #2563eb; }
+    .section-title.amber i { color: #d97706; }
+    .section-title.green i { color: #16a34a; }
+
+    /* CODE BLOCK */
+    .code-wrap { position: relative; margin-bottom: 16px; }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      border-radius: 8px;
+      border: 1px solid #fed7aa;
+      padding: 18px 20px;
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 0;
+    }
+    pre.code-block .cm  { color: var(--cm);  font-style: italic; }
+    pre.code-block .tg  { color: var(--tg);  font-weight: 600; }
+    pre.code-block .at  { color: var(--at); }
+    pre.code-block .st  { color: var(--st); }
+    pre.code-block .vl  { color: var(--vl); }
+    pre.code-block .pr  { color: var(--pr); }
+    pre.code-block .sl  { color: var(--sl);  font-weight: 600; }
+    pre.code-block .fn  { color: #c2410c;   font-weight: 600; }
+    pre.code-block .kw  { color: #7c3aed;   font-weight: 600; }
+    pre.code-block .num { color: #0284c7; }
+    pre.code-block .hl  { background: #fde68a; border-radius: 3px; padding: 0 3px; }
+
+    /* COPY BUTTON */
+    .copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--accent); color: #fff; border: none;
+      padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      font-family: 'Sarabun', sans-serif; display: flex; align-items: center; gap: 5px;
+      transition: background .15s;
+      z-index: 2;
+    }
+    .copy-btn:hover { background: #c2410c; }
+    .copy-btn.copied { background: #16a34a; }
+
+    /* TABLES */
+    table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    table.tbl th { background: #fff7ed; color: var(--dark); text-align: left; padding: 10px 14px; font-weight: 700; border-bottom: 2px solid #fed7aa; }
+    table.tbl td { padding: 9px 14px; border-bottom: 1px solid #fde8d0; vertical-align: top; }
+    table.tbl tr:last-child td { border-bottom: none; }
+    table.tbl tr:hover td { background: #fff7ed; }
+
+    /* INLINE CODE */
+    code { background: #fde8d0; color: #9a3412; border-radius: 4px; padding: 1px 7px; font-size: 12.5px; font-family: 'Courier New', monospace; }
+
+    /* NOTES */
+    .note { border-left: 4px solid var(--accent2); background: #fff7ed; border-radius: 6px; padding: 12px 16px; font-size: 13.5px; margin-top: 14px; }
+    .note.warn  { background: #fffbea; border-left-color: #f59e0b; }
+    .note.info  { background: #eff6ff; border-left-color: #3b82f6; }
+    .note.green { background: #f0fdf4; border-left-color: #16a34a; }
+    .note i { margin-right: 6px; }
+
+    /* FLOW DIAGRAM */
+    .flow {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+      margin: 16px 0; justify-content: center;
+    }
+    .flow-box {
+      background: #fff7ed; border: 2px solid #fed7aa; border-radius: 10px;
+      padding: 14px 18px; text-align: center; font-size: 13px; min-width: 110px;
+    }
+    .flow-box .flow-icon { font-size: 24px; color: var(--accent); margin-bottom: 4px; }
+    .flow-box .flow-label { font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+    .flow-box .flow-sub { font-size: 11px; color: var(--muted); }
+    .flow-arrow { font-size: 22px; color: var(--accent2); padding: 0 8px; }
+
+    /* SCHEMA GRID */
+    .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 12px; }
+    .schema-card {
+      background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px;
+      padding: 12px 14px; font-size: 13px;
+    }
+    .schema-card .sk { font-family: 'Courier New', monospace; color: #c2410c; font-weight: 700; font-size: 13px; }
+    .schema-card .sh { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .schema-card .si { display: inline-block; margin-top: 6px; background: #fde68a; color: #92400e; font-size: 11px; padding: 1px 7px; border-radius: 10px; }
+
+    /* STEP BADGES */
+    .steps { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+    .step { display: flex; gap: 14px; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px; background: var(--accent);
+      color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; margin-top: 2px;
+    }
+    .step-body { flex: 1; }
+    .step-body strong { color: var(--accent); }
+
+    /* FILE TABS */
+    .file-tabs { display: flex; gap: 0; margin-bottom: -1px; }
+    .file-tab {
+      padding: 8px 18px; background: #fde8d0; border: 1px solid #fed7aa;
+      border-bottom: none; border-radius: 8px 8px 0 0; font-size: 13px;
+      cursor: pointer; font-family: 'Sarabun', sans-serif;
+      color: var(--muted); font-weight: 600;
+    }
+    .file-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .file-panel { border: 1px solid #fed7aa; border-radius: 0 8px 8px 8px; overflow: hidden; }
+
+    /* SECTION ANCHOR */
+    .section[id] { scroll-margin-top: 20px; }
+
+    footer { text-align: center; font-size: 12px; color: #aaa; padding-bottom: 24px; }
+    footer i { color: #fed7aa; margin-right: 5px; }
+
+    p { margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+    ul { margin: 8px 0 8px 20px; }
+    ul li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="icon"><i class="fa-solid fa-database"></i></div>
+  <div>
+    <h1>การใช้ Google Sheets เป็นฐานข้อมูลร่วมกับ Google Apps Script Backend</h1>
+    <p>วิชาการพัฒนาเว็บแอปสมัยใหม่ &nbsp;|&nbsp; โรงเรียนจอมทอง &nbsp;|&nbsp; ม.4–6</p>
+  </div>
+  <div class="badge"><i class="fa-brands fa-google" style="margin-right:6px;"></i>Google Apps Script</div>
+</header>
+
+<main>
+
+  <!-- NAV -->
+  <div class="nav-pills">
+    <a class="nav-pill" href="#overview"><i class="fa-solid fa-sitemap"></i> ภาพรวม</a>
+    <a class="nav-pill" href="#files"><i class="fa-solid fa-folder-open"></i> โครงสร้างไฟล์</a>
+    <a class="nav-pill" href="#schema"><i class="fa-solid fa-table-columns"></i> SCHEMA</a>
+    <a class="nav-pill" href="#setup"><i class="fa-solid fa-gear"></i> setupSheet</a>
+    <a class="nav-pill" href="#doget"><i class="fa-solid fa-globe"></i> doGet</a>
+    <a class="nav-pill" href="#submit"><i class="fa-solid fa-paper-plane"></i> submitApplication</a>
+    <a class="nav-pill" href="#helpers"><i class="fa-solid fa-wrench"></i> Helper Functions</a>
+    <a class="nav-pill" href="#codegs-full"><i class="fa-brands fa-google"></i> code.gs ทั้งหมด</a>
+    <a class="nav-pill" href="#frontend"><i class="fa-solid fa-code"></i> index.html</a>
+    <a class="nav-pill" href="#deploy"><i class="fa-solid fa-rocket"></i> Deploy</a>
+    <a class="nav-pill" href="#troubleshooting"><i class="fa-solid fa-circle-exclamation"></i> แก้ปัญหา</a>
+    <a class="nav-pill" href="#limitations"><i class="fa-solid fa-scale-balanced"></i> ข้อจำกัด</a>
+  </div>
+
+  <!-- 1 ภาพรวม -->
+  <div class="section" id="overview">
+    <div class="section-title"><i class="fa-solid fa-sitemap"></i>1. ภาพรวม — ระบบทำงานอย่างไร</div>
+    <p>ระบบนี้ใช้ <strong>Google Apps Script (GAS)</strong> เป็น Backend และใช้ <strong>Google Sheets</strong> เก็บข้อมูล — ไม่ต้องเช่า Server หรือดูแล Database เอง เหมาะสำหรับแบบฝึกหัดและระบบขนาดเล็กถึงปานกลาง</p>
+
+    <div class="flow">
+      <div class="flow-box">
+        <div class="flow-icon"><i class="fa-solid fa-user"></i></div>
+        <div class="flow-label">ผู้ใช้</div>
+        <div class="flow-sub">กรอกฟอร์ม</div>
+      </div>
+      <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="flow-box">
+        <div class="flow-icon"><i class="fa-brands fa-html5"></i></div>
+        <div class="flow-label">index.html</div>
+        <div class="flow-sub">Frontend / UI</div>
+      </div>
+      <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="flow-box" style="border-color:#ea580c; background:#fff0e6;">
+        <div class="flow-icon" style="color:#ea580c;"><i class="fa-brands fa-google"></i></div>
+        <div class="flow-label">code.gs</div>
+        <div class="flow-sub">Backend / Logic</div>
+      </div>
+      <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="flow-box" style="border-color:#16a34a; background:#f0fdf4;">
+        <div class="flow-icon" style="color:#16a34a;"><i class="fa-solid fa-table"></i></div>
+        <div class="flow-label">Google Sheet</div>
+        <div class="flow-sub">ฐานข้อมูล</div>
+      </div>
+    </div>
+
+    <table class="tbl" style="margin-top:16px;">
+      <tr><th>ชั้น</th><th>ไฟล์</th><th>หน้าที่</th><th>เทียบกับระบบจริง</th></tr>
+      <tr><td><strong>Frontend</strong></td><td><code>index.html</code></td><td>หน้าเว็บที่ผู้ใช้เห็น กรอกข้อมูล กดปุ่มส่ง</td><td>React / Vue / HTML หน้าเว็บทั่วไป</td></tr>
+      <tr><td><strong>Backend</strong></td><td><code>code.gs</code></td><td>รับข้อมูล ตรวจสอบ บันทึกลง Sheet</td><td>Node.js / Python / PHP Server</td></tr>
+      <tr><td><strong>Database</strong></td><td>Google Sheet</td><td>เก็บข้อมูลเป็นแถว ๆ แต่ละคอลัมน์คือ field</td><td>MySQL / PostgreSQL / MongoDB</td></tr>
+    </table>
+
+    <div class="note"><i class="fa-solid fa-lightbulb" style="color:var(--accent);"></i><strong>ทำไมใช้ Google Sheet?</strong> เหมาะสำหรับโปรเจกต์โรงเรียน ไม่ต้องจ่ายค่า Server ดูข้อมูลได้ง่าย export Excel ได้ทันที และแชร์ให้ครูตรวจได้เลย</div>
+  </div>
+
+  <!-- 2 FILES -->
+  <div class="section" id="files">
+    <div class="section-title"><i class="fa-solid fa-folder-open"></i>2. โครงสร้างไฟล์</div>
+    <p>โปรเจกต์ Google Apps Script มีไฟล์เพียง 2 ไฟล์หลัก</p>
+    <div class="schema-grid" style="grid-template-columns: 1fr 1fr; margin-top:14px;">
+      <div class="schema-card" style="border-color:#ea580c;">
+        <div class="sk"><i class="fa-brands fa-google" style="margin-right:6px;"></i>code.gs</div>
+        <div class="sh" style="margin-top:6px;">ไฟล์ Backend เขียนด้วย JavaScript และทำงานบน V8 Runtime<br>รันบน Google Server ไม่ใช่ Browser</div>
+        <div class="si">Backend</div>
+      </div>
+      <div class="schema-card" style="border-color:#2563eb;">
+        <div class="sk"><i class="fa-brands fa-html5" style="margin-right:6px;color:#e34c26;"></i>index.html</div>
+        <div class="sh" style="margin-top:6px;">ไฟล์ Frontend ที่ผู้ใช้เห็น<br>มี HTML + CSS + JavaScript รวมในไฟล์เดียว</div>
+        <div class="si" style="background:#bfdbfe; color:#1e3a8a;">Frontend</div>
+      </div>
+    </div>
+    <div class="note info"><i class="fa-solid fa-circle-info" style="color:#2563eb;"></i>ใน GAS ต้องตั้งชื่อไฟล์ HTML เป็น <code>index</code> (ไม่ต้องมี .html) แล้วเรียกผ่าน <code>HtmlService.createHtmlOutputFromFile('<strong>index</strong>')</code></div>
+  </div>
+
+  <!-- 3 SCHEMA -->
+  <div class="section" id="schema">
+    <div class="section-title"><i class="fa-solid fa-table-columns"></i>3. SCHEMA — กำหนดโครงสร้างข้อมูล</div>
+    <p>SCHEMA คือ "แผนผังคอลัมน์" ของตาราง — เปรียบได้กับการออกแบบตาราง Database ก่อนสร้าง</p>
+
+    <div class="note warn"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i><strong>ต้องแก้ไขก่อนใช้งาน:</strong> เปลี่ยนข้อความ <code>ใส่_SHEET_ID_ของคุณ_ตรงนี้</code> เป็น Sheet ID ที่คัดลอกจาก URL ของ Google Sheet ของคุณ</div>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="cm">// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ค่าคงที่ — กำหนดตำแหน่ง Sheet และชื่อ Sheet
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="cm">// ⚠️ ต้องเปลี่ยนเป็น Sheet ID ของคุณก่อนใช้งาน</span>
+<span class="kw">const</span> <span class="sl">SPREADSHEET_ID</span> = <span class="st" style="background:#7c2d12;color:#fef3c7;padding:2px 5px;border-radius:4px;">'ใส่_SHEET_ID_ของคุณ_ตรงนี้'</span>;
+<span class="kw">const</span> <span class="sl">SHEET_NAME</span>     = <span class="st">'Applications'</span>;
+
+<span class="cm">// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SCHEMA — กำหนดว่าแต่ละคอลัมน์ใน Sheet
+//  ชื่ออะไร (key) และแสดงหัวตาราง (header) ว่าอะไร
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="kw">const</span> <span class="sl">SCHEMA</span> = [
+  { <span class="at">key</span>: <span class="st">'id'</span>,        <span class="at">header</span>: <span class="st">'ID'</span>           },  <span class="cm">// สร้างอัตโนมัติ</span>
+  { <span class="at">key</span>: <span class="st">'timestamp'</span>, <span class="at">header</span>: <span class="st">'วันที่สมัคร'</span>  },  <span class="cm">// สร้างอัตโนมัติ</span>
+  { <span class="at">key</span>: <span class="st">'name'</span>,      <span class="at">header</span>: <span class="st">'ชื่อ-นามสกุล'</span> },  <span class="cm">// รับจากฟอร์ม</span>
+  { <span class="at">key</span>: <span class="st">'email'</span>,     <span class="at">header</span>: <span class="st">'อีเมล'</span>        },  <span class="cm">// รับจากฟอร์ม</span>
+  { <span class="at">key</span>: <span class="st">'phone'</span>,     <span class="at">header</span>: <span class="st">'เบอร์โทรศัพท์'</span> },
+  { <span class="at">key</span>: <span class="st">'gender'</span>,    <span class="at">header</span>: <span class="st">'เพศ'</span>          },
+  { <span class="at">key</span>: <span class="st">'grade'</span>,     <span class="at">header</span>: <span class="st">'ระดับชั้น'</span>    },
+  { <span class="at">key</span>: <span class="st">'room'</span>,      <span class="at">header</span>: <span class="st">'ห้องเรียน'</span>    },
+  { <span class="at">key</span>: <span class="st">'skills'</span>,    <span class="at">header</span>: <span class="st">'ทักษะ'</span>        },  <span class="cm">// Array → string</span>
+  { <span class="at">key</span>: <span class="st">'bio'</span>,       <span class="at">header</span>: <span class="st">'แนะนำตัว'</span>     }
+];</pre>
+    </div>
+
+    <p><strong>SCHEMA ทำงานอย่างไร?</strong> แทนที่จะเขียน column แบบ hardcode ทุกจุด เราใช้ array นี้เป็นแหล่งความจริงเดียว (single source of truth) ทำให้แก้ไขง่าย</p>
+
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="sk">id</div>
+        <div class="sh">หัวตาราง: ID</div>
+        <div class="si">สร้างอัตโนมัติ (UUID)</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">timestamp</div>
+        <div class="sh">หัวตาราง: วันที่สมัคร</div>
+        <div class="si">สร้างอัตโนมัติ</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">name</div>
+        <div class="sh">หัวตาราง: ชื่อ-นามสกุล</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">email</div>
+        <div class="sh">หัวตาราง: อีเมล</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">phone</div>
+        <div class="sh">หัวตาราง: เบอร์โทรศัพท์</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">gender</div>
+        <div class="sh">หัวตาราง: เพศ</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">grade</div>
+        <div class="sh">หัวตาราง: ระดับชั้น</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">room</div>
+        <div class="sh">หัวตาราง: ห้องเรียน</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">skills</div>
+        <div class="sh">หัวตาราง: ทักษะ</div>
+        <div class="si">Array → เชื่อมด้วย ,</div>
+      </div>
+      <div class="schema-card">
+        <div class="sk">bio</div>
+        <div class="sh">หัวตาราง: แนะนำตัว</div>
+        <div class="si">จากฟอร์ม</div>
+      </div>
+    </div>
+
+    <div class="note warn"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i><strong>ลำดับสำคัญมาก!</strong> SCHEMA กำหนดลำดับคอลัมน์ใน Sheet หากยังไม่มีข้อมูลสามารถแก้แล้วรัน <code>setupSheet()</code> ใหม่ได้ แต่ถ้ามีข้อมูลแล้วควรเพิ่มคอลัมน์ต่อท้ายเท่านั้น การแทรกหรือสลับคอลัมน์กลางตารางจะทำให้หัวตารางไม่ตรงกับข้อมูลเดิมและต้องย้ายข้อมูลเอง</div>
+  </div>
+
+  <!-- 4 SETUP -->
+  <div class="section" id="setup">
+    <div class="section-title"><i class="fa-solid fa-gear"></i>4. setupSheet() — ติดตั้งหัวตาราง</div>
+    <p>ฟังก์ชันนี้รันครั้งเดียวตอนเริ่มโปรเจกต์ เพื่อสร้าง Sheet และหัวตาราง — ถ้ารันซ้ำก็ไม่ลบข้อมูลเดิม</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="cm">/** รันได้ทุกเมื่อ — สร้างชีต/หัวตารางเท่านั้น ไม่ลบข้อมูลเดิม */</span>
+<span class="kw">function</span> <span class="fn">setupSheet</span>() {
+
+  <span class="cm">// 1. ตรวจว่าผู้ใช้เปลี่ยน Sheet ID แล้ว</span>
+  <span class="fn">validateConfig_</span>();
+
+  <span class="cm">// 2. เปิด Spreadsheet ด้วย ID</span>
+  <span class="kw">const</span> ss = SpreadsheetApp.<span class="fn">openById</span>(SPREADSHEET_ID);
+
+  <span class="cm">// 3. หา Sheet ที่ชื่อตรงกับ SHEET_NAME</span>
+  <span class="kw">let</span> sheet = ss.<span class="fn">getSheetByName</span>(SHEET_NAME);
+
+  <span class="cm">// 4. ถ้าไม่มี Sheet นั้น → สร้างใหม่</span>
+  <span class="kw">if</span> (!sheet) {
+    sheet = ss.<span class="fn">insertSheet</span>(SHEET_NAME);
+  }
+
+  <span class="cm">// 4. ดึงชื่อ header ทุกคอลัมน์จาก SCHEMA</span>
+  <span class="kw">const</span> headers = SCHEMA.<span class="fn">map</span>(<span class="kw">function</span>(col) { <span class="kw">return</span> col.header; });
+  <span class="cm">//  ผลลัพธ์: ['ID', 'วันที่สมัคร', 'ชื่อ-นามสกุล', ...]</span>
+
+  <span class="cm">// 5. เลือก Range แถวที่ 1 ทั้งหมด แล้วใส่ header</span>
+  <span class="kw">const</span> headerRange = sheet.<span class="fn">getRange</span>(<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, headers.length);
+  <span class="cm">//  getRange(แถว, คอลัมน์, จำนวนแถว, จำนวนคอลัมน์)</span>
+  headerRange.<span class="fn">setValues</span>([headers]);  <span class="cm">// ต้องห่อใน Array 2 มิติ [[...]]</span>
+
+  <span class="cm">// 6. ตกแต่ง header — สีเขียวเข้ม ตัวหนา ตัวอักษรขาว จัดกลาง</span>
+  headerRange
+    .<span class="fn">setFontWeight</span>(<span class="st">'bold'</span>)
+    .<span class="fn">setBackground</span>(<span class="st">'#16a34a'</span>)
+    .<span class="fn">setFontColor</span>(<span class="st">'#ffffff'</span>)
+    .<span class="fn">setHorizontalAlignment</span>(<span class="st">'center'</span>);
+
+  <span class="cm">// 7. ตรึงแถว header ไว้ด้านบน (Freeze row)</span>
+  sheet.<span class="fn">setFrozenRows</span>(<span class="num">1</span>);
+
+  <span class="cm">// 8. ปรับความกว้างคอลัมน์ให้พอดีข้อมูล</span>
+  sheet.<span class="fn">autoResizeColumns</span>(<span class="num">1</span>, headers.length);
+
+  <span class="cm">// 9. Log ว่ามีข้อมูลเดิมกี่แถว (ตรวจสอบว่าไม่ถูกลบ)</span>
+  <span class="kw">const</span> dataRows = Math.<span class="fn">max</span>(<span class="num">0</span>, sheet.<span class="fn">getLastRow</span>() - <span class="num">1</span>);
+  Logger.<span class="fn">log</span>(<span class="st">'setupSheet: OK — ข้อมูลเดิม '</span> + dataRows + <span class="st">' แถว (ไม่ถูกลบ)'</span>);
+}</pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>Method ที่ใช้</th><th>อธิบาย</th></tr>
+      <tr><td><code>SpreadsheetApp.openById(id)</code></td><td>เปิด Spreadsheet จาก ID ใน URL</td></tr>
+      <tr><td><code>ss.getSheetByName(name)</code></td><td>หา Sheet tab ที่ชื่อตรง — ถ้าไม่เจอ return <code>null</code></td></tr>
+      <tr><td><code>ss.insertSheet(name)</code></td><td>สร้าง Sheet tab ใหม่</td></tr>
+      <tr><td><code>sheet.getRange(r, c, rows, cols)</code></td><td>เลือกพื้นที่เซลล์ (เริ่มนับจาก 1 ไม่ใช่ 0)</td></tr>
+      <tr><td><code>range.setValues([[...]])</code></td><td>ใส่ข้อมูล — ต้องเป็น Array 2 มิติ</td></tr>
+      <tr><td><code>sheet.setFrozenRows(1)</code></td><td>ตรึง 1 แถวบนสุด (header จะไม่เลื่อนตามเมื่อ scroll)</td></tr>
+      <tr><td><code>sheet.autoResizeColumns(c, n)</code></td><td>ปรับความกว้าง n คอลัมน์อัตโนมัติ</td></tr>
+      <tr><td><code>sheet.getLastRow()</code></td><td>แถวสุดท้ายที่มีข้อมูล — ใช้นับจำนวนแถว</td></tr>
+    </table>
+
+    <div class="note green"><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i>วิธีรัน: ใน Apps Script editor เลือกฟังก์ชัน <code>setupSheet</code> แล้วกดปุ่ม ▶ Run — รันแค่ครั้งเดียว แล้วไปดูผลใน Google Sheet ได้เลย</div>
+  </div>
+
+  <!-- 5 DOGET -->
+  <div class="section" id="doget">
+    <div class="section-title"><i class="fa-solid fa-globe"></i>5. doGet() — จุดเริ่มต้นของ Web App</div>
+    <p>ฟังก์ชัน <code>doGet()</code> เป็น <strong>entry point</strong> พิเศษของ GAS — เมื่อมีคนเข้า URL ของ Web App ด้วย HTTP GET, GAS จะเรียกฟังก์ชันนี้โดยอัตโนมัติ</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="cm">/** แสดงหน้าเว็บฟอร์ม — GAS เรียกอัตโนมัติเมื่อเข้า URL */</span>
+<span class="kw">function</span> <span class="fn">doGet</span>() {
+  <span class="kw">return</span> HtmlService
+    .<span class="fn">createHtmlOutputFromFile</span>(<span class="st">'index'</span>)  <span class="cm">// โหลดไฟล์ index.html</span>
+    .<span class="fn">setTitle</span>(<span class="st">'ใบสมัคร ชมรมเขียนเว็บแอป'</span>); <span class="cm">// ตั้งชื่อ tab browser</span>
+}</pre>
+    </div>
+
+    <div class="flow" style="margin:16px 0;">
+      <div class="flow-box">
+        <div class="flow-icon"><i class="fa-solid fa-link"></i></div>
+        <div class="flow-label">Browser เข้า URL</div>
+        <div class="flow-sub">HTTP GET Request</div>
+      </div>
+      <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="flow-box" style="border-color:#ea580c; background:#fff0e6;">
+        <div class="flow-icon" style="color:#ea580c;"><i class="fa-solid fa-code"></i></div>
+        <div class="flow-label">doGet() ทำงาน</div>
+        <div class="flow-sub">GAS เรียกอัตโนมัติ</div>
+      </div>
+      <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="flow-box" style="border-color:#2563eb; background:#eff6ff;">
+        <div class="flow-icon" style="color:#2563eb;"><i class="fa-brands fa-html5"></i></div>
+        <div class="flow-label">ส่ง index.html กลับ</div>
+        <div class="flow-sub">ผู้ใช้เห็นฟอร์ม</div>
+      </div>
+    </div>
+
+    <div class="note info"><i class="fa-solid fa-circle-info" style="color:#2563eb;"></i>ชื่อฟังก์ชัน <code>doGet</code> และ <code>doPost</code> เป็นชื่อสงวนใน GAS — ต้องสะกดให้ถูกต้องทุกตัวอักษร ห้ามเปลี่ยนชื่อ</div>
+  </div>
+
+  <!-- 6 SUBMIT -->
+  <div class="section" id="submit">
+    <div class="section-title"><i class="fa-solid fa-paper-plane"></i>6. submitApplication() — บันทึกข้อมูลลง Sheet</div>
+    <p>ฟังก์ชันนี้ถูกเรียกจาก JavaScript ใน index.html ผ่าน <code>google.script.run</code> — รับ JSON object จากฟอร์ม ตรวจสอบข้อมูล แล้วบันทึกลง Sheet</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="cm">/** บันทึกข้อมูลจากฟอร์ม — รับ JSON object จาก Frontend */</span>
+<span class="kw">function</span> <span class="fn">submitApplication</span>(data) {
+
+  <span class="cm">// ── ① ตรวจสอบว่าได้รับข้อมูลมาจริง และเป็น object ──────────</span>
+  <span class="kw">if</span> (!data || <span class="kw">typeof</span> data !== <span class="st">'object'</span>) {
+    <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ข้อมูลไม่ถูกต้อง'</span> };
+  }
+
+  <span class="cm">// ── ② Validate ข้อมูลสำคัญ ──────────────────────────────────</span>
+  <span class="kw">const</span> name  = <span class="fn">trim_</span>(data.name);
+  <span class="kw">const</span> email = <span class="fn">trim_</span>(data.email);
+  <span class="kw">const</span> phone = <span class="fn">trim_</span>(data.phone);
+
+  <span class="kw">if</span> (!name)                      <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'กรุณากรอกชื่อ-นามสกุล'</span> };
+  <span class="kw">if</span> (name.length &gt; <span class="num">100</span>)          <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ชื่อยาวเกิน 100 ตัวอักษร'</span> };
+  <span class="kw">if</span> (!email)                     <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'กรุณากรอกอีเมล'</span> };
+  <span class="kw">if</span> (!<span class="fn">isValidEmail_</span>(email))     <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'รูปแบบอีเมลไม่ถูกต้อง'</span> };
+  <span class="kw">if</span> (phone &amp;&amp; !<span class="st">/^[0-9+\-\s]{8,20}$/</span>.<span class="fn">test</span>(phone)) <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง'</span> };
+  <span class="kw">if</span> (<span class="fn">trim_</span>(data.bio).length &gt; <span class="num">1000</span>) <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ข้อความแนะนำตัวยาวเกิน 1,000 ตัวอักษร'</span> };
+
+  <span class="cm">// ── ③ เตรียมข้อมูลแต่ละคอลัมน์ตาม SCHEMA ──────────────────</span>
+  <span class="kw">const</span> sheet = <span class="fn">getSheet_</span>();
+  <span class="kw">const</span> row = SCHEMA.<span class="fn">map</span>(<span class="kw">function</span>(col) {
+    <span class="kw">switch</span> (col.key) {
+
+      <span class="kw">case</span> <span class="st">'id'</span>:
+        <span class="cm">// สร้าง UUID อัตโนมัติ เช่น "a3f9b2c1-..."</span>
+        <span class="kw">return</span> Utilities.<span class="fn">getUuid</span>();
+
+      <span class="kw">case</span> <span class="st">'timestamp'</span>:
+        <span class="cm">// บันทึกเวลา ณ ปัจจุบัน รูปแบบ yyyy-MM-dd HH:mm:ss</span>
+        <span class="kw">return</span> Utilities.<span class="fn">formatDate</span>(
+          <span class="kw">new</span> <span class="fn">Date</span>(),
+          Session.<span class="fn">getScriptTimeZone</span>() || <span class="st">'Asia/Bangkok'</span>,
+          <span class="st">'yyyy-MM-dd HH:mm:ss'</span>
+        );
+
+      <span class="kw">case</span> <span class="st">'skills'</span>:
+        <span class="cm">// skills เป็น Array เช่น ['html','css','js']</span>
+        <span class="cm">// เชื่อมเป็น string: "html, css, js"</span>
+        <span class="kw">return</span> <span class="fn">safeText_</span>(Array.<span class="fn">isArray</span>(data.skills)
+          ? data.skills.<span class="fn">join</span>(<span class="st">', '</span>)
+          : data.skills);
+
+      <span class="kw">default</span>:
+        <span class="cm">// ตัดช่องว่างและป้องกันค่าที่ Sheet อาจตีความเป็นสูตร</span>
+        <span class="kw">return</span> <span class="fn">safeText_</span>(data[col.key]);
+    }
+  });
+  <span class="cm">// row = ['uuid...', '2025-01-15 10:30:00', 'สมชาย', 'som@...', ...]</span>
+
+  <span class="cm">// ── ④ เพิ่มแถวใหม่ใน Sheet ──────────────────────────────────</span>
+  <span class="kw">const</span> lock = LockService.<span class="fn">getScriptLock</span>();
+  lock.<span class="fn">waitLock</span>(<span class="num">10000</span>);
+  <span class="kw">try</span> {
+    sheet.<span class="fn">appendRow</span>(row);
+  } <span class="kw">finally</span> {
+    lock.<span class="fn">releaseLock</span>();
+  }
+  <span class="cm">// Lock ป้องกันคำขอหลายรายการเขียนแถวพร้อมกัน</span>
+
+  <span class="cm">// ── ⑤ ส่งผลกลับ Frontend ──────────────────────────────────</span>
+  <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">true</span>, <span class="at">message</span>: <span class="st">'บันทึกข้อมูลสำเร็จ'</span> };
+}</pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>Method / Utility</th><th>อธิบาย</th></tr>
+      <tr><td><code>Utilities.getUuid()</code></td><td>สร้าง UUID แบบสุ่ม เช่น <code>a3f9b2c1-4b3e-4f2d-...</code> ใช้เป็น ID ไม่ซ้ำ</td></tr>
+      <tr><td><code>Utilities.formatDate(date, tz, fmt)</code></td><td>แปลง Date เป็น String ตามรูปแบบที่กำหนด</td></tr>
+      <tr><td><code>Session.getScriptTimeZone()</code></td><td>ดึง timezone ของ Script (ตั้งค่าใน Project Settings)</td></tr>
+      <tr><td><code>Array.isArray(val)</code></td><td>ตรวจว่าค่าเป็น Array หรือไม่</td></tr>
+      <tr><td><code>arr.join(', ')</code></td><td>เชื่อม Array เป็น string คั่นด้วย <code>, </code></td></tr>
+      <tr><td><code>SCHEMA.map(fn)</code></td><td>วนลูปทุก column สร้างแถวข้อมูลตามลำดับ SCHEMA</td></tr>
+      <tr><td><code>sheet.appendRow(row)</code></td><td>เพิ่มแถวใหม่ต่อท้ายข้อมูลที่มีอยู่ใน Sheet</td></tr>
+      <tr><td><code>LockService.getScriptLock()</code></td><td>จัดคิวการเขียนข้อมูล ป้องกันหลายคำขอแก้ Sheet พร้อมกัน</td></tr>
+    </table>
+
+    <div class="note"><i class="fa-solid fa-rotate" style="color:var(--accent);"></i><strong>Flow การส่งข้อมูล:</strong> ฟอร์ม → JS เก็บเป็น JSON → <code>google.script.run.submitApplication(json)</code> → GAS ตรวจ → <code>appendRow()</code> → ส่ง <code>{success: true}</code> กลับ → JS แสดง Toast</div>
+  </div>
+
+  <!-- 7 HELPERS -->
+  <div class="section" id="helpers">
+    <div class="section-title"><i class="fa-solid fa-wrench"></i>7. Helper Functions — ฟังก์ชันช่วยเหลือ</div>
+    <p>ฟังก์ชันที่ชื่อลงท้ายด้วย <code>_</code> เป็น convention (ข้อตกลง) บอกว่าเป็น private function ใช้ภายในไฟล์เดียวกันเท่านั้น</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="cm">// ── Helper 1: ตรวจค่าตั้งค่าที่ต้องแก้ก่อนใช้งาน ──────────</span>
+<span class="kw">function</span> <span class="fn">validateConfig_</span>() {
+  <span class="kw">if</span> (!SPREADSHEET_ID || SPREADSHEET_ID === <span class="st">'ใส่_SHEET_ID_ของคุณ_ตรงนี้'</span>) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">'กรุณาเปลี่ยน SPREADSHEET_ID เป็น Sheet ID ของคุณก่อน'</span>);
+  }
+}
+
+<span class="cm">// ── Helper 2: ดึง Sheet — ถ้าไม่มีให้ throw Error ──────────</span>
+<span class="kw">function</span> <span class="fn">getSheet_</span>() {
+  <span class="fn">validateConfig_</span>();
+  <span class="kw">const</span> ss    = SpreadsheetApp.<span class="fn">openById</span>(SPREADSHEET_ID);
+  <span class="kw">const</span> sheet = ss.<span class="fn">getSheetByName</span>(SHEET_NAME);
+  <span class="kw">if</span> (!sheet) {
+    <span class="cm">// throw = หยุดทำงานทันที ส่ง Error กลับ Frontend</span>
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">'ยังไม่ได้ติดตั้งชีต — กรุณารัน setupSheet() ก่อน'</span>);
+  }
+  <span class="kw">return</span> sheet;
+}
+
+<span class="cm">// ── Helper 3: ตัดช่องว่างหัวท้าย ป้องกัน null/undefined ────</span>
+<span class="kw">function</span> <span class="fn">trim_</span>(val) {
+  <span class="cm">// ถ้า val เป็น null หรือ undefined → return ''</span>
+  <span class="cm">// ถ้าไม่ใช่ → แปลงเป็น String แล้วตัดช่องว่าง</span>
+  <span class="kw">return</span> val == <span class="kw">null</span> ? <span class="st">''</span> : <span class="fn">String</span>(val).<span class="fn">trim</span>();
+}
+<span class="cm">// ตัวอย่าง: trim_('  สมชาย  ') → 'สมชาย'</span>
+<span class="cm">// ตัวอย่าง: trim_(null)       → ''</span>
+<span class="cm">// ตัวอย่าง: trim_(undefined)  → ''</span>
+
+<span class="cm">// ── Helper 4: ป้องกันข้อความถูกตีความเป็นสูตรใน Sheet ─────</span>
+<span class="kw">function</span> <span class="fn">safeText_</span>(val) {
+  <span class="kw">const</span> text = <span class="fn">trim_</span>(val);
+  <span class="kw">return</span> <span class="st">/^[=+\-@]/</span>.<span class="fn">test</span>(text) ? <span class="st">"'"</span> + text : text;
+}
+
+<span class="cm">// ── Helper 5: ตรวจรูปแบบอีเมลด้วย Regular Expression ───────</span>
+<span class="kw">function</span> <span class="fn">isValidEmail_</span>(email) {
+  <span class="cm">// Regex อธิบาย:</span>
+  <span class="cm">// ^[^\s@]+   = ต้องขึ้นต้นด้วยตัวอักษรที่ไม่ใช่ space หรือ @</span>
+  <span class="cm">// @          = ต้องมี @</span>
+  <span class="cm">// [^\s@]+    = ตามด้วยชื่อ domain ไม่มี space หรือ @</span>
+  <span class="cm">// \.         = ต้องมีจุด .</span>
+  <span class="cm">// [^\s@]+$   = ลงท้ายด้วย extension เช่น .com .th</span>
+  <span class="kw">return</span> <span class="st">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span>.<span class="fn">test</span>(email);
+}
+<span class="cm">// ตัวอย่าง: isValidEmail_('som@gmail.com') → true</span>
+<span class="cm">// ตัวอย่าง: isValidEmail_('somsak')        → false</span></pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>ฟังก์ชัน</th><th>Input</th><th>Output</th><th>วัตถุประสงค์</th></tr>
+      <tr><td><code>validateConfig_()</code></td><td>—</td><td>— หรือ throw Error</td><td>แจ้งเตือนทันทีหากยังไม่ได้เปลี่ยน Sheet ID</td></tr>
+      <tr><td><code>getSheet_()</code></td><td>—</td><td>Sheet object หรือ throw Error</td><td>เปิด Sheet ทุกครั้งที่ต้องการเขียนข้อมูล</td></tr>
+      <tr><td><code>trim_(val)</code></td><td>ค่าใดก็ได้</td><td>String ไม่มีช่องว่างหัวท้าย</td><td>ป้องกัน null crash และช่องว่างในข้อมูล</td></tr>
+      <tr><td><code>safeText_(val)</code></td><td>ค่าใดก็ได้</td><td>String ที่ปลอดภัย</td><td>ป้องกันข้อความจากฟอร์มถูกตีความเป็นสูตร</td></tr>
+      <tr><td><code>isValidEmail_(email)</code></td><td>String</td><td>true / false</td><td>ตรวจรูปแบบอีเมลขั้นพื้นฐาน</td></tr>
+    </table>
+
+    <div class="note warn"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i><strong>การใช้ <code>throw new Error()</code></strong>: เมื่อ GAS throw error, <code>withFailureHandler</code> ใน Frontend จะจับ error นั้นและแสดง Toast สีแดงให้ผู้ใช้ทราบ</div>
+  </div>
+
+  <!-- 8 code.gs ทั้งหมด -->
+  <div class="section" id="codegs-full">
+    <div class="section-title amber"><i class="fa-brands fa-google" style="color:#d97706;"></i>code.gs — โค้ดทั้งหมด (copy ได้)</div>
+
+    <div class="note warn"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i><strong>สำคัญ:</strong> หลังคัดลอกโค้ด ให้เปลี่ยนค่า <code>SPREADSHEET_ID</code> ด้านล่างเป็น Sheet ID ของคุณ หากไม่เปลี่ยน ระบบจะเชื่อมต่อ Google Sheet ไม่ได้</div>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอกทั้งหมด</button>
+<pre class="code-block"><span class="cm">/**
+ * Web App ชมรมเขียนเว็บแอป — โรงเรียนจอมทอง
+ * บันทึกข้อมูลลง Google Sheet (JSON only)
+ */</span>
+
+<span class="cm">// ⚠️ ต้องเปลี่ยนเป็น Sheet ID ของคุณก่อนใช้งาน</span>
+<span class="kw">const</span> SPREADSHEET_ID = <span class="st" style="background:#7c2d12;color:#fef3c7;padding:2px 5px;border-radius:4px;">'ใส่_SHEET_ID_ของคุณ_ตรงนี้'</span>;
+<span class="kw">const</span> SHEET_NAME     = <span class="st">'Applications'</span>;
+
+<span class="kw">const</span> SCHEMA = [
+  { <span class="at">key</span>: <span class="st">'id'</span>,        <span class="at">header</span>: <span class="st">'ID'</span>           },
+  { <span class="at">key</span>: <span class="st">'timestamp'</span>, <span class="at">header</span>: <span class="st">'วันที่สมัคร'</span>  },
+  { <span class="at">key</span>: <span class="st">'name'</span>,      <span class="at">header</span>: <span class="st">'ชื่อ-นามสกุล'</span> },
+  { <span class="at">key</span>: <span class="st">'email'</span>,     <span class="at">header</span>: <span class="st">'อีเมล'</span>        },
+  { <span class="at">key</span>: <span class="st">'phone'</span>,     <span class="at">header</span>: <span class="st">'เบอร์โทรศัพท์'</span> },
+  { <span class="at">key</span>: <span class="st">'gender'</span>,    <span class="at">header</span>: <span class="st">'เพศ'</span>          },
+  { <span class="at">key</span>: <span class="st">'grade'</span>,     <span class="at">header</span>: <span class="st">'ระดับชั้น'</span>    },
+  { <span class="at">key</span>: <span class="st">'room'</span>,      <span class="at">header</span>: <span class="st">'ห้องเรียน'</span>    },
+  { <span class="at">key</span>: <span class="st">'skills'</span>,    <span class="at">header</span>: <span class="st">'ทักษะ'</span>        },
+  { <span class="at">key</span>: <span class="st">'bio'</span>,       <span class="at">header</span>: <span class="st">'แนะนำตัว'</span>     }
+];
+
+<span class="cm">/** รันได้ทุกเมื่อ — สร้างชีต/หัวตารางเท่านั้น ไม่ลบข้อมูลเดิม */</span>
+<span class="kw">function</span> <span class="fn">setupSheet</span>() {
+  <span class="fn">validateConfig_</span>();
+  <span class="kw">const</span> ss = SpreadsheetApp.<span class="fn">openById</span>(SPREADSHEET_ID);
+  <span class="kw">let</span> sheet = ss.<span class="fn">getSheetByName</span>(SHEET_NAME);
+  <span class="kw">if</span> (!sheet) { sheet = ss.<span class="fn">insertSheet</span>(SHEET_NAME); }
+  <span class="kw">const</span> headers = SCHEMA.<span class="fn">map</span>(<span class="kw">function</span>(col) { <span class="kw">return</span> col.header; });
+  <span class="kw">const</span> headerRange = sheet.<span class="fn">getRange</span>(<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, headers.length);
+  headerRange.<span class="fn">setValues</span>([headers]);
+  headerRange
+    .<span class="fn">setFontWeight</span>(<span class="st">'bold'</span>)
+    .<span class="fn">setBackground</span>(<span class="st">'#16a34a'</span>)
+    .<span class="fn">setFontColor</span>(<span class="st">'#ffffff'</span>)
+    .<span class="fn">setHorizontalAlignment</span>(<span class="st">'center'</span>);
+  sheet.<span class="fn">setFrozenRows</span>(<span class="num">1</span>);
+  sheet.<span class="fn">autoResizeColumns</span>(<span class="num">1</span>, headers.length);
+  <span class="kw">const</span> dataRows = Math.<span class="fn">max</span>(<span class="num">0</span>, sheet.<span class="fn">getLastRow</span>() - <span class="num">1</span>);
+  Logger.<span class="fn">log</span>(<span class="st">'setupSheet: OK — ข้อมูลเดิม '</span> + dataRows + <span class="st">' แถว (ไม่ถูกลบ)'</span>);
+}
+
+<span class="cm">/** แสดงหน้าเว็บฟอร์ม */</span>
+<span class="kw">function</span> <span class="fn">doGet</span>() {
+  <span class="kw">return</span> HtmlService
+    .<span class="fn">createHtmlOutputFromFile</span>(<span class="st">'index'</span>)
+    .<span class="fn">setTitle</span>(<span class="st">'ใบสมัคร ชมรมเขียนเว็บแอป'</span>);
+}
+
+<span class="cm">/** บันทึกข้อมูลจากฟอร์ม (รับ JSON object) */</span>
+<span class="kw">function</span> <span class="fn">submitApplication</span>(data) {
+  <span class="kw">if</span> (!data || <span class="kw">typeof</span> data !== <span class="st">'object'</span>) {
+    <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ข้อมูลไม่ถูกต้อง'</span> };
+  }
+  <span class="kw">const</span> name  = <span class="fn">trim_</span>(data.name);
+  <span class="kw">const</span> email = <span class="fn">trim_</span>(data.email);
+  <span class="kw">const</span> phone = <span class="fn">trim_</span>(data.phone);
+  <span class="kw">if</span> (!name)               <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'กรุณากรอกชื่อ-นามสกุล'</span> };
+  <span class="kw">if</span> (name.length &gt; <span class="num">100</span>)   <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ชื่อยาวเกิน 100 ตัวอักษร'</span> };
+  <span class="kw">if</span> (!email)              <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'กรุณากรอกอีเมล'</span> };
+  <span class="kw">if</span> (!<span class="fn">isValidEmail_</span>(email)) <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'รูปแบบอีเมลไม่ถูกต้อง'</span> };
+  <span class="kw">if</span> (phone &amp;&amp; !<span class="st">/^[0-9+\-\s]{8,20}$/</span>.<span class="fn">test</span>(phone)) <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง'</span> };
+  <span class="kw">if</span> (<span class="fn">trim_</span>(data.bio).length &gt; <span class="num">1000</span>) <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">false</span>, <span class="at">error</span>: <span class="st">'ข้อความแนะนำตัวยาวเกิน 1,000 ตัวอักษร'</span> };
+  <span class="kw">const</span> sheet = <span class="fn">getSheet_</span>();
+  <span class="kw">const</span> row = SCHEMA.<span class="fn">map</span>(<span class="kw">function</span>(col) {
+    <span class="kw">switch</span> (col.key) {
+      <span class="kw">case</span> <span class="st">'id'</span>:        <span class="kw">return</span> Utilities.<span class="fn">getUuid</span>();
+      <span class="kw">case</span> <span class="st">'timestamp'</span>: <span class="kw">return</span> Utilities.<span class="fn">formatDate</span>(<span class="kw">new</span> <span class="fn">Date</span>(), Session.<span class="fn">getScriptTimeZone</span>() || <span class="st">'Asia/Bangkok'</span>, <span class="st">'yyyy-MM-dd HH:mm:ss'</span>);
+      <span class="kw">case</span> <span class="st">'skills'</span>:    <span class="kw">return</span> <span class="fn">safeText_</span>(Array.<span class="fn">isArray</span>(data.skills) ? data.skills.<span class="fn">join</span>(<span class="st">', '</span>) : data.skills);
+      <span class="kw">default</span>:         <span class="kw">return</span> <span class="fn">safeText_</span>(data[col.key]);
+    }
+  });
+  <span class="kw">const</span> lock = LockService.<span class="fn">getScriptLock</span>();
+  lock.<span class="fn">waitLock</span>(<span class="num">10000</span>);
+  <span class="kw">try</span> {
+    sheet.<span class="fn">appendRow</span>(row);
+  } <span class="kw">finally</span> {
+    lock.<span class="fn">releaseLock</span>();
+  }
+  <span class="kw">return</span> { <span class="at">success</span>: <span class="kw">true</span>, <span class="at">message</span>: <span class="st">'บันทึกข้อมูลสำเร็จ'</span> };
+}
+
+<span class="kw">function</span> <span class="fn">validateConfig_</span>() {
+  <span class="kw">if</span> (!SPREADSHEET_ID || SPREADSHEET_ID === <span class="st">'ใส่_SHEET_ID_ของคุณ_ตรงนี้'</span>) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">'กรุณาเปลี่ยน SPREADSHEET_ID เป็น Sheet ID ของคุณก่อน'</span>);
+  }
+}
+
+<span class="kw">function</span> <span class="fn">getSheet_</span>() {
+  <span class="fn">validateConfig_</span>();
+  <span class="kw">const</span> ss    = SpreadsheetApp.<span class="fn">openById</span>(SPREADSHEET_ID);
+  <span class="kw">const</span> sheet = ss.<span class="fn">getSheetByName</span>(SHEET_NAME);
+  <span class="kw">if</span> (!sheet) { <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">'ยังไม่ได้ติดตั้งชีต — กรุณารัน setupSheet() ก่อน'</span>); }
+  <span class="kw">return</span> sheet;
+}
+
+<span class="kw">function</span> <span class="fn">trim_</span>(val) {
+  <span class="kw">return</span> val == <span class="kw">null</span> ? <span class="st">''</span> : <span class="fn">String</span>(val).<span class="fn">trim</span>();
+}
+
+<span class="kw">function</span> <span class="fn">safeText_</span>(val) {
+  <span class="kw">const</span> text = <span class="fn">trim_</span>(val);
+  <span class="kw">return</span> <span class="st">/^[=+\-@]/</span>.<span class="fn">test</span>(text) ? <span class="st">"'"</span> + text : text;
+}
+
+<span class="kw">function</span> <span class="fn">isValidEmail_</span>(email) {
+  <span class="kw">return</span> <span class="st">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span>.<span class="fn">test</span>(email);
+}</pre>
+    </div>
+  </div>
+
+  <!-- 9 FRONTEND -->
+  <div class="section" id="frontend">
+    <div class="section-title blue"><i class="fa-brands fa-html5" style="color:#2563eb;"></i>8. index.html — Frontend อธิบายทุกส่วน</div>
+    <p>ไฟล์ Frontend มี 3 ส่วนหลัก: <strong>CSS</strong> (หน้าตา) → <strong>HTML</strong> (โครงสร้าง) → <strong>JavaScript</strong> (พฤติกรรม)</p>
+
+    <!-- 9.1 CSS -->
+    <p style="font-weight:700; color:#2563eb; margin-top:16px; font-size:14px;"><i class="fa-solid fa-palette" style="margin-right:6px;"></i>ส่วนที่ 1 — CSS (หน้าตาและ Toast Notification)</p>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="tg">&lt;style&gt;</span>
+  <span class="cm">/* ── ฟอร์มหลัก ─────────────────────────────────────────── */</span>
+  <span class="sl">body</span> { <span class="at">font-family</span>: <span class="st">'Google Sans', sans-serif</span>; <span class="at">max-width</span>: <span class="vl">640px</span>; <span class="at">margin</span>: <span class="vl">30px auto</span>; }
+  <span class="sl">.box</span> { <span class="at">border</span>: <span class="vl">2px dashed #86efac</span>; <span class="at">border-radius</span>: <span class="vl">12px</span>; <span class="at">background</span>: <span class="vl">#f0fdf4</span>; <span class="at">padding</span>: <span class="vl">20px 24px</span>; }
+
+  <span class="cm">/* ── ปุ่ม submit มี 2 สถานะ: ปกติ / กำลังโหลด ─────────── */</span>
+  <span class="sl">button[type="submit"]</span> { <span class="at">background</span>: <span class="vl">#16a34a</span>; <span class="at">color</span>: <span class="vl">#fff</span>; <span class="at">min-width</span>: <span class="vl">190px</span>; }
+  <span class="sl">button[type="submit"]:disabled</span> { <span class="at">opacity</span>: <span class="vl">0.75</span>; <span class="at">cursor</span>: <span class="vl">not-allowed</span>; }
+
+  <span class="cm">/* ── Toast Container — ชิดขวาล่าง ─────────────────────── */</span>
+  <span class="sl">.toast-container</span> {
+    <span class="at">position</span>: <span class="vl">fixed</span>;      <span class="cm">/* ติดหน้าจอไม่เลื่อนตาม */</span>
+    <span class="at">bottom</span>: <span class="vl">24px</span>;
+    <span class="at">right</span>: <span class="vl">24px</span>;
+    <span class="at">z-index</span>: <span class="vl">9999</span>;        <span class="cm">/* อยู่บนสุดเสมอ */</span>
+    <span class="at">display</span>: <span class="vl">flex</span>;
+    <span class="at">flex-direction</span>: <span class="vl">column</span>;
+    <span class="at">gap</span>: <span class="vl">10px</span>;
+    <span class="at">pointer-events</span>: <span class="vl">none</span>; <span class="cm">/* Container ไม่บล็อกการคลิก */</span>
+  }
+
+  <span class="cm">/* ── Toast แต่ละชิ้น ───────────────────────────────────── */</span>
+  <span class="sl">.toast</span> {
+    <span class="at">pointer-events</span>: <span class="vl">auto</span>;   <span class="cm">/* toast ตัวเองรับคลิกได้ (ปุ่มปิด) */</span>
+    <span class="at">animation</span>: <span class="vl">toast-in 0.35s ease</span>;
+    <span class="at">transition</span>: <span class="vl">opacity 0.3s ease, transform 0.3s ease</span>;
+  }
+  <span class="sl">.toast.hide</span> { <span class="at">opacity</span>: <span class="vl">0</span>; <span class="at">transform</span>: <span class="vl">translateX(40px)</span>; }
+  <span class="sl">.toast.success</span> { <span class="at">border-left</span>: <span class="vl">4px solid #16a34a</span>; }
+  <span class="sl">.toast.error</span>   { <span class="at">border-left</span>: <span class="vl">4px solid #dc2626</span>; }
+
+  <span class="cm">/* ── Animation เลื่อนเข้าจากขวา ──────────────────────── */</span>
+  <span class="sl">@keyframes toast-in</span> {
+    <span class="at">from</span> { <span class="at">opacity</span>: <span class="vl">0</span>; <span class="at">transform</span>: <span class="vl">translateX(40px)</span>; }
+    <span class="at">to</span>   { <span class="at">opacity</span>: <span class="vl">1</span>; <span class="at">transform</span>: <span class="vl">translateX(0)</span>; }
+  }
+<span class="tg">&lt;/style&gt;</span></pre>
+    </div>
+
+    <!-- 9.2 HTML -->
+    <p style="font-weight:700; color:#2563eb; margin-top:20px; font-size:14px;"><i class="fa-solid fa-code" style="margin-right:6px;"></i>ส่วนที่ 2 — HTML (โครงสร้างฟอร์ม)</p>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"box"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;h2&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-laptop-code"</span><span class="tg">&gt;&lt;/i&gt;</span>ใบสมัคร ชมรมเขียนเว็บแอป<span class="tg">&lt;/h2&gt;</span>
+
+  <span class="cm">&lt;!-- id="appForm" ใช้ใน JavaScript เพื่อ addEventListener --&gt;</span>
+  <span class="tg">&lt;form</span> <span class="at">id</span>=<span class="st">"appForm"</span><span class="tg">&gt;</span>
+
+    <span class="cm">&lt;!-- แต่ละช่องกรอกอยู่ใน div.field เพื่อจัด layout --&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-user"</span><span class="tg">&gt;&lt;/i&gt;</span>ชื่อ-นามสกุล<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"name"</span> <span class="at">name</span>=<span class="st">"name"</span> <span class="at">placeholder</span>=<span class="st">"เช่น นายสมชาย ใจดี"</span> <span class="at">required</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+
+    <span class="cm">&lt;!-- grade และ room ใช้ &lt;select&gt; ที่ JavaScript จะ fillSelect() ─ --&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-graduation-cap"</span><span class="tg">&gt;&lt;/i&gt;</span>ระดับชั้น<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;select</span> <span class="at">id</span>=<span class="st">"grade"</span> <span class="at">name</span>=<span class="st">"grade"</span><span class="tg">&gt;&lt;/select&gt;</span>  <span class="cm">&lt;!-- ว่างไว้ — JS จะเติม --&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+
+    <span class="cm">&lt;!-- checkbox หลายตัวใช้ name เดียวกัน JS จะ querySelectorAll --&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-code"</span><span class="tg">&gt;&lt;/i&gt;</span>ทักษะที่มีอยู่แล้ว<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"checkbox-group"</span><span class="tg">&gt;</span>
+        <span class="tg">&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"html"</span><span class="tg">&gt;</span> HTML<span class="tg">&lt;/label&gt;</span>
+        <span class="tg">&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"css"</span><span class="tg">&gt;</span>  CSS<span class="tg">&lt;/label&gt;</span>
+        <span class="tg">&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"js"</span><span class="tg">&gt;</span>   JavaScript<span class="tg">&lt;/label&gt;</span>
+        <span class="tg">&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"python"</span><span class="tg">&gt;</span> Python<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+
+    <span class="cm">&lt;!-- ปุ่ม submit มี id เพื่อเปลี่ยน state เป็น loading --&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"btn-row"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"submit"</span> <span class="at">id</span>=<span class="st">"submitBtn"</span><span class="tg">&gt;</span>
+        <span class="tg">&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-paper-plane"</span><span class="tg">&gt;&lt;/i&gt;</span>สมัครเข้าร่วมชมรม
+      <span class="tg">&lt;/button&gt;</span>
+      <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"reset"</span><span class="tg">&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-rotate-left"</span><span class="tg">&gt;&lt;/i&gt;</span> ล้างข้อมูล<span class="tg">&lt;/button&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;/form&gt;</span>
+<span class="tg">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- Toast Container — ว่างไว้ JS จะสร้าง toast ใส่ที่นี่ --&gt;</span>
+<span class="tg">&lt;div</span> <span class="at">id</span>=<span class="st">"toastContainer"</span> <span class="at">class</span>=<span class="st">"toast-container"</span> <span class="at">aria-live</span>=<span class="st">"polite"</span><span class="tg">&gt;&lt;/div&gt;</span></pre>
+    </div>
+
+    <!-- 9.3 JS -->
+    <p style="font-weight:700; color:#2563eb; margin-top:20px; font-size:14px;"><i class="fa-brands fa-js" style="margin-right:6px;"></i>ส่วนที่ 3 — JavaScript (6 หน้าที่หลัก)</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+<pre class="code-block"><span class="tg">&lt;script&gt;</span>
+<span class="cm">// ── ① เก็บ reference DOM ที่จะใช้บ่อย ─────────────────────</span>
+<span class="kw">const</span> form            = document.<span class="fn">getElementById</span>(<span class="st">'appForm'</span>);
+<span class="kw">const</span> submitBtn       = document.<span class="fn">getElementById</span>(<span class="st">'submitBtn'</span>);
+<span class="kw">const</span> toastContainer  = document.<span class="fn">getElementById</span>(<span class="st">'toastContainer'</span>);
+<span class="kw">const</span> submitBtnDefault = submitBtn.innerHTML; <span class="cm">// เก็บข้อความปุ่มเดิมไว้</span>
+
+<span class="cm">// ── ② fillSelect — เติม option ใน &lt;select&gt; ────────────────</span>
+<span class="kw">function</span> <span class="fn">fillSelect</span>(el, placeholder, items) {
+  <span class="cm">// สร้าง option แรก (placeholder)</span>
+  el.innerHTML = <span class="st">'&lt;option value=""&gt;'</span> + placeholder + <span class="st">'&lt;/option&gt;'</span>;
+  <span class="cm">// วนลูปสร้าง option ตาม items array</span>
+  items.<span class="fn">forEach</span>(<span class="kw">function</span>(item) {
+    <span class="kw">const</span> opt = document.<span class="fn">createElement</span>(<span class="st">'option'</span>);
+    opt.value       = item.value;
+    opt.textContent = item.label;
+    el.<span class="fn">appendChild</span>(opt);
+  });
+}
+
+<span class="cm">// เติม dropdown ระดับชั้น ม.1 – ม.6</span>
+<span class="fn">fillSelect</span>(
+  document.<span class="fn">getElementById</span>(<span class="st">'grade'</span>),
+  <span class="st">'-- เลือกระดับชั้น --'</span>,
+  [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>].<span class="fn">map</span>(<span class="kw">function</span>(n) {
+    <span class="kw">return</span> { <span class="at">value</span>: <span class="st">'m'</span> + n, <span class="at">label</span>: <span class="st">'ม.'</span> + n };
+  })
+);
+
+<span class="cm">// เติม dropdown ห้องเรียน 1 – 13</span>
+<span class="fn">fillSelect</span>(
+  document.<span class="fn">getElementById</span>(<span class="st">'room'</span>),
+  <span class="st">'-- เลือกห้อง --'</span>,
+  Array.<span class="fn">from</span>({ <span class="at">length</span>: <span class="num">13</span> }, <span class="kw">function</span>(_, i) {
+    <span class="kw">const</span> n = i + <span class="num">1</span>;
+    <span class="kw">return</span> { <span class="at">value</span>: <span class="fn">String</span>(n), <span class="at">label</span>: <span class="st">'ห้อง '</span> + n };
+  })
+);
+
+<span class="cm">// ── ③ setButtonLoading — สลับสถานะปุ่ม ────────────────────</span>
+<span class="kw">function</span> <span class="fn">setButtonLoading</span>(loading) {
+  submitBtn.disabled = loading;
+  <span class="kw">if</span> (loading) {
+    <span class="cm">// เปลี่ยนเป็น spinner + ข้อความ "กำลังส่ง..."</span>
+    submitBtn.innerHTML = <span class="st">'&lt;i class="fa-solid fa-spinner fa-spin"&gt;&lt;/i&gt;กำลังส่งข้อมูล...'</span>;
+  } <span class="kw">else</span> {
+    <span class="cm">// คืนค่าข้อความปุ่มเดิม</span>
+    submitBtn.innerHTML = submitBtnDefault;
+  }
+}
+
+<span class="cm">// ── ④ showToast — แสดงกล่องแจ้งเตือน ──────────────────────</span>
+<span class="kw">function</span> <span class="fn">showToast</span>(type, message) {
+  <span class="kw">const</span> isSuccess = type === <span class="st">'success'</span>;
+  <span class="kw">const</span> toast = document.<span class="fn">createElement</span>(<span class="st">'div'</span>);
+  toast.className = <span class="st">'toast '</span> + type;
+  toast.innerHTML = <span class="cm">/* ... สร้าง HTML ของ toast ... */</span>
+    <span class="st">'&lt;div class="toast-icon"&gt;&lt;i class="fa-solid fa-'</span> +
+    (isSuccess ? <span class="st">'circle-check'</span> : <span class="st">'circle-xmark'</span>) + <span class="st">'"&gt;&lt;/i&gt;&lt;/div&gt;'</span> +
+    <span class="st">'&lt;div class="toast-body"&gt;&lt;div class="toast-title"&gt;'</span> +
+    (isSuccess ? <span class="st">'สำเร็จ'</span> : <span class="st">'ล้มเหลว'</span>) +
+    <span class="st">'&lt;/div&gt;&lt;div&gt;'</span> + message + <span class="st">'&lt;/div&gt;&lt;/div&gt;'</span> +
+    <span class="st">'&lt;button class="toast-close"&gt;&lt;i class="fa-solid fa-xmark"&gt;&lt;/i&gt;&lt;/button&gt;'</span>;
+
+  <span class="kw">const</span> close = <span class="kw">function</span>() {
+    toast.classList.<span class="fn">add</span>(<span class="st">'hide'</span>);               <span class="cm">// เล่น animation slide out</span>
+    <span class="fn">setTimeout</span>(<span class="kw">function</span>() { toast.<span class="fn">remove</span>(); }, <span class="num">300</span>); <span class="cm">// ลบออกหลัง animation</span>
+  };
+  toast.<span class="fn">querySelector</span>(<span class="st">'.toast-close'</span>).<span class="fn">addEventListener</span>(<span class="st">'click'</span>, close);
+  toastContainer.<span class="fn">appendChild</span>(toast);
+  <span class="fn">setTimeout</span>(close, <span class="num">4000</span>); <span class="cm">// ปิดอัตโนมัติหลัง 4 วินาที</span>
+}
+
+<span class="cm">// ── ⑤ collectFormJson — รวบรวมข้อมูลจากฟอร์มเป็น JSON ────</span>
+<span class="kw">function</span> <span class="fn">collectFormJson</span>() {
+  <span class="cm">// checkbox ที่ติ๊ก → เก็บเป็น Array</span>
+  <span class="kw">const</span> skills = Array.<span class="fn">from</span>(
+    document.<span class="fn">querySelectorAll</span>(<span class="st">'input[name="skill"]:checked'</span>)
+  ).<span class="fn">map</span>(<span class="kw">function</span>(cb) { <span class="kw">return</span> cb.value; });
+  <span class="cm">// ถ้าติ๊ก html,css,js → skills = ['html', 'css', 'js']</span>
+
+  <span class="cm">// radio → เลือกตัวที่ checked</span>
+  <span class="kw">const</span> genderEl = document.<span class="fn">querySelector</span>(<span class="st">'input[name="gender"]:checked'</span>);
+
+  <span class="kw">return</span> {
+    <span class="at">name</span>:   document.<span class="fn">getElementById</span>(<span class="st">'name'</span>).value.<span class="fn">trim</span>(),
+    <span class="at">email</span>:  document.<span class="fn">getElementById</span>(<span class="st">'email'</span>).value.<span class="fn">trim</span>(),
+    <span class="at">phone</span>:  document.<span class="fn">getElementById</span>(<span class="st">'phone'</span>).value.<span class="fn">trim</span>(),
+    <span class="at">gender</span>: genderEl ? genderEl.value : <span class="st">''</span>,  <span class="cm">// ถ้าไม่เลือก → ''</span>
+    <span class="at">grade</span>:  document.<span class="fn">getElementById</span>(<span class="st">'grade'</span>).value,
+    <span class="at">room</span>:   document.<span class="fn">getElementById</span>(<span class="st">'room'</span>).value,
+    <span class="at">skills</span>: skills,
+    <span class="at">bio</span>:    document.<span class="fn">getElementById</span>(<span class="st">'bio'</span>).value.<span class="fn">trim</span>()
+  };
+}
+
+<span class="cm">// ── ⑥ submit — ส่งข้อมูลไป GAS ─────────────────────────────</span>
+form.<span class="fn">addEventListener</span>(<span class="st">'submit'</span>, <span class="kw">function</span>(e) {
+  e.<span class="fn">preventDefault</span>();  <span class="cm">// ป้องกัน browser refresh หน้า</span>
+  <span class="fn">setButtonLoading</span>(<span class="kw">true</span>);
+
+  <span class="kw">const</span> payload = <span class="fn">collectFormJson</span>();
+
+  <span class="cm">// google.script.run — Bridge ระหว่าง HTML และ GAS</span>
+  google.script.run
+    .<span class="fn">withSuccessHandler</span>(<span class="kw">function</span>(res) {   <span class="cm">// GAS return ปกติ</span>
+      <span class="fn">setButtonLoading</span>(<span class="kw">false</span>);
+      <span class="kw">if</span> (res.success) {
+        <span class="fn">showToast</span>(<span class="st">'success'</span>, res.message);
+        form.<span class="fn">reset</span>();               <span class="cm">// ล้างฟอร์ม</span>
+      } <span class="kw">else</span> {
+        <span class="fn">showToast</span>(<span class="st">'error'</span>, res.error || <span class="st">'เกิดข้อผิดพลาด'</span>);
+      }
+    })
+    .<span class="fn">withFailureHandler</span>(<span class="kw">function</span>(err) {  <span class="cm">// GAS throw Error</span>
+      <span class="fn">setButtonLoading</span>(<span class="kw">false</span>);
+      <span class="fn">showToast</span>(<span class="st">'error'</span>, err.message || <span class="st">'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'</span>);
+    })
+    .<span class="fn">submitApplication</span>(payload);  <span class="cm">// เรียกฟังก์ชัน GAS</span>
+});
+<span class="tg">&lt;/script&gt;</span></pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>เทคนิค JavaScript</th><th>อธิบาย</th></tr>
+      <tr><td><code>google.script.run</code></td><td>Bridge พิเศษของ GAS — ใช้เรียกฟังก์ชันใน code.gs จาก HTML</td></tr>
+      <tr><td><code>.withSuccessHandler(fn)</code></td><td>ฟังก์ชันที่รันเมื่อ GAS สำเร็จ — รับค่า return จาก GAS</td></tr>
+      <tr><td><code>.withFailureHandler(fn)</code></td><td>ฟังก์ชันที่รันเมื่อ GAS throw Error</td></tr>
+      <tr><td><code>querySelectorAll(':checked')</code></td><td>หา checkbox / radio ที่ถูกเลือกทั้งหมด</td></tr>
+      <tr><td><code>Array.from(...).map()</code></td><td>แปลง NodeList เป็น Array แล้วดึง value ออกมา</td></tr>
+      <tr><td><code>e.preventDefault()</code></td><td>ป้องกัน browser ทำ default action (reload หน้า)</td></tr>
+      <tr><td><code>document.createElement('div')</code></td><td>สร้าง element ใหม่ใน JavaScript แล้วใส่ใน DOM</td></tr>
+      <tr><td><code>setTimeout(fn, ms)</code></td><td>หน่วงเวลาก่อนทำงาน — ใช้ปิด toast อัตโนมัติ</td></tr>
+    </table>
+  </div>
+
+  <!-- 10 index.html ทั้งหมด -->
+  <div class="section">
+    <div class="section-title blue"><i class="fa-brands fa-html5" style="color:#2563eb;"></i>index.html — โค้ดทั้งหมด (copy ได้)</div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)"><i class="fa-solid fa-copy"></i> คัดลอกทั้งหมด</button>
+<pre class="code-block"><span class="tg">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;</span>
+  <span class="tg">&lt;base</span> <span class="at">target</span>=<span class="st">"_top"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;link</span> <span class="at">href</span>=<span class="st">"https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700&amp;display=swap"</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;style&gt;</span>
+    <span class="sl">body</span> { <span class="at">font-family</span>: <span class="vl">'Google Sans', sans-serif</span>; <span class="at">max-width</span>: <span class="vl">640px</span>; <span class="at">margin</span>: <span class="vl">30px auto</span>; <span class="at">padding</span>: <span class="vl">0 20px</span>; }
+    <span class="sl">.box</span> { <span class="at">border</span>: <span class="vl">2px dashed #86efac</span>; <span class="at">border-radius</span>: <span class="vl">12px</span>; <span class="at">background</span>: <span class="vl">#f0fdf4</span>; <span class="at">padding</span>: <span class="vl">20px 24px</span>; }
+    <span class="sl">h2</span> { <span class="at">color</span>: <span class="vl">#15803d</span>; <span class="at">border-bottom</span>: <span class="vl">2px solid #86efac</span>; <span class="at">padding-bottom</span>: <span class="vl">8px</span>; <span class="at">font-size</span>: <span class="vl">18px</span>; <span class="at">margin</span>: <span class="vl">0 0 16px 0</span>; }
+    <span class="sl">h2 i</span> { <span class="at">margin-right</span>: <span class="vl">8px</span>; }
+    <span class="sl">.field</span> { <span class="at">margin-bottom</span>: <span class="vl">14px</span>; }
+    <span class="sl">.field &gt; label</span> { <span class="at">display</span>: <span class="vl">block</span>; <span class="at">font-weight</span>: <span class="vl">bold</span>; <span class="at">margin-bottom</span>: <span class="vl">4px</span>; <span class="at">color</span>: <span class="vl">#166534</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; }
+    <span class="sl">.field &gt; label i</span> { <span class="at">margin-right</span>: <span class="vl">6px</span>; <span class="at">color</span>: <span class="vl">#16a34a</span>; }
+    <span class="sl">input[type="text"], input[type="email"], input[type="tel"], select, textarea</span> {
+      <span class="at">width</span>: <span class="vl">100%</span>; <span class="at">padding</span>: <span class="vl">8px 12px</span>; <span class="at">border</span>: <span class="vl">1px solid #86efac</span>;
+      <span class="at">border-radius</span>: <span class="vl">6px</span>; <span class="at">box-sizing</span>: <span class="vl">border-box</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; <span class="at">background</span>: <span class="vl">#fff</span>;
+      <span class="at">font-family</span>: <span class="vl">'Google Sans', sans-serif</span>;
+    }
+    <span class="sl">input:focus, select:focus, textarea:focus</span> { <span class="at">outline</span>: <span class="vl">none</span>; <span class="at">border-color</span>: <span class="vl">#16a34a</span>; <span class="at">box-shadow</span>: <span class="vl">0 0 0 2px #bbf7d0</span>; }
+    <span class="sl">.radio-group, .checkbox-group</span> { <span class="at">display</span>: <span class="vl">flex</span>; <span class="at">gap</span>: <span class="vl">16px</span>; <span class="at">margin-top</span>: <span class="vl">2px</span>; <span class="at">flex-wrap</span>: <span class="vl">wrap</span>; }
+    <span class="sl">.radio-group label, .checkbox-group label</span> { <span class="at">display</span>: <span class="vl">inline-flex</span>; <span class="at">align-items</span>: <span class="vl">center</span>; <span class="at">gap</span>: <span class="vl">6px</span>; <span class="at">font-weight</span>: <span class="vl">normal</span>; <span class="at">cursor</span>: <span class="vl">pointer</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; }
+    <span class="sl">.btn-row</span> { <span class="at">margin-top</span>: <span class="vl">8px</span>; <span class="at">display</span>: <span class="vl">flex</span>; <span class="at">gap</span>: <span class="vl">10px</span>; }
+    <span class="sl">button[type="submit"]</span> { <span class="at">background</span>: <span class="vl">#16a34a</span>; <span class="at">color</span>: <span class="vl">#fff</span>; <span class="at">border</span>: <span class="vl">none</span>; <span class="at">padding</span>: <span class="vl">9px 24px</span>; <span class="at">border-radius</span>: <span class="vl">6px</span>; <span class="at">cursor</span>: <span class="vl">pointer</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; <span class="at">font-weight</span>: <span class="vl">bold</span>; <span class="at">min-width</span>: <span class="vl">190px</span>; <span class="at">display</span>: <span class="vl">inline-flex</span>; <span class="at">align-items</span>: <span class="vl">center</span>; <span class="at">justify-content</span>: <span class="vl">center</span>; <span class="at">gap</span>: <span class="vl">8px</span>; <span class="at">font-family</span>: <span class="vl">'Google Sans', sans-serif</span>; }
+    <span class="sl">button[type="submit"]:disabled</span> { <span class="at">opacity</span>: <span class="vl">0.75</span>; <span class="at">cursor</span>: <span class="vl">not-allowed</span>; }
+    <span class="sl">button[type="reset"]</span> { <span class="at">background</span>: <span class="vl">#f0fdf4</span>; <span class="at">color</span>: <span class="vl">#15803d</span>; <span class="at">border</span>: <span class="vl">1px solid #86efac</span>; <span class="at">padding</span>: <span class="vl">9px 24px</span>; <span class="at">border-radius</span>: <span class="vl">6px</span>; <span class="at">cursor</span>: <span class="vl">pointer</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; <span class="at">font-family</span>: <span class="vl">'Google Sans', sans-serif</span>; }
+    <span class="sl">button[type="reset"] i</span> { <span class="at">margin-right</span>: <span class="vl">6px</span>; }
+    <span class="sl">.toast-container</span> { <span class="at">position</span>: <span class="vl">fixed</span>; <span class="at">bottom</span>: <span class="vl">24px</span>; <span class="at">right</span>: <span class="vl">24px</span>; <span class="at">z-index</span>: <span class="vl">9999</span>; <span class="at">display</span>: <span class="vl">flex</span>; <span class="at">flex-direction</span>: <span class="vl">column</span>; <span class="at">gap</span>: <span class="vl">10px</span>; <span class="at">pointer-events</span>: <span class="vl">none</span>; }
+    <span class="sl">.toast</span> { <span class="at">pointer-events</span>: <span class="vl">auto</span>; <span class="at">display</span>: <span class="vl">flex</span>; <span class="at">align-items</span>: <span class="vl">center</span>; <span class="at">gap</span>: <span class="vl">12px</span>; <span class="at">min-width</span>: <span class="vl">280px</span>; <span class="at">max-width</span>: <span class="vl">360px</span>; <span class="at">padding</span>: <span class="vl">14px 16px</span>; <span class="at">border-radius</span>: <span class="vl">10px</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; <span class="at">box-shadow</span>: <span class="vl">0 8px 24px rgba(0,0,0,.12)</span>; <span class="at">background</span>: <span class="vl">#fff</span>; <span class="at">animation</span>: <span class="vl">toast-in .35s ease</span>; <span class="at">transition</span>: <span class="vl">opacity .3s ease, transform .3s ease</span>; }
+    <span class="sl">.toast.hide</span> { <span class="at">opacity</span>: <span class="vl">0</span>; <span class="at">transform</span>: <span class="vl">translateX(40px)</span>; }
+    <span class="sl">.toast.success</span> { <span class="at">color</span>: <span class="vl">#166534</span>; <span class="at">border-left</span>: <span class="vl">4px solid #16a34a</span>; }
+    <span class="sl">.toast.error</span>   { <span class="at">color</span>: <span class="vl">#991b1b</span>; <span class="at">border-left</span>: <span class="vl">4px solid #dc2626</span>; }
+    <span class="sl">.toast-icon</span> { <span class="at">flex-shrink</span>: <span class="vl">0</span>; <span class="at">width</span>: <span class="vl">32px</span>; <span class="at">height</span>: <span class="vl">32px</span>; <span class="at">border-radius</span>: <span class="vl">50%</span>; <span class="at">display</span>: <span class="vl">flex</span>; <span class="at">align-items</span>: <span class="vl">center</span>; <span class="at">justify-content</span>: <span class="vl">center</span>; <span class="at">font-size</span>: <span class="vl">15px</span>; }
+    <span class="sl">.toast.success .toast-icon</span> { <span class="at">background</span>: <span class="vl">#dcfce7</span>; <span class="at">color</span>: <span class="vl">#16a34a</span>; }
+    <span class="sl">.toast.error .toast-icon</span>   { <span class="at">background</span>: <span class="vl">#fee2e2</span>; <span class="at">color</span>: <span class="vl">#dc2626</span>; }
+    <span class="sl">.toast-body</span> { <span class="at">flex</span>: <span class="vl">1</span>; <span class="at">line-height</span>: <span class="vl">1.4</span>; }
+    <span class="sl">.toast-title</span> { <span class="at">font-weight</span>: <span class="vl">bold</span>; <span class="at">margin-bottom</span>: <span class="vl">2px</span>; }
+    <span class="sl">.toast-close</span> { <span class="at">background</span>: <span class="vl">none</span>; <span class="at">border</span>: <span class="vl">none</span>; <span class="at">color</span>: <span class="vl">#9ca3af</span>; <span class="at">cursor</span>: <span class="vl">pointer</span>; <span class="at">padding</span>: <span class="vl">4px</span>; <span class="at">font-size</span>: <span class="vl">14px</span>; }
+    <span class="sl">@keyframes toast-in</span> { <span class="at">from</span> { <span class="at">opacity</span>: <span class="vl">0</span>; <span class="at">transform</span>: <span class="vl">translateX(40px)</span>; } <span class="at">to</span> { <span class="at">opacity</span>: <span class="vl">1</span>; <span class="at">transform</span>: <span class="vl">translateX(0)</span>; } }
+  <span class="tg">&lt;/style&gt;</span>
+<span class="tg">&lt;/head&gt;</span>
+<span class="tg">&lt;body&gt;</span>
+<span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"box"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;h2&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-laptop-code"</span><span class="tg">&gt;&lt;/i&gt;</span>ใบสมัคร ชมรมเขียนเว็บแอป โรงเรียนจอมทอง<span class="tg">&lt;/h2&gt;</span>
+  <span class="tg">&lt;form</span> <span class="at">id</span>=<span class="st">"appForm"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-user"</span><span class="tg">&gt;&lt;/i&gt;</span>ชื่อ-นามสกุล<span class="tg">&lt;/label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"text"</span> <span class="at">id</span>=<span class="st">"name"</span> <span class="at">name</span>=<span class="st">"name"</span> <span class="at">placeholder</span>=<span class="st">"เช่น นายสมชาย ใจดี"</span> <span class="at">required</span><span class="tg">&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-envelope"</span><span class="tg">&gt;&lt;/i&gt;</span>อีเมล<span class="tg">&lt;/label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"email"</span> <span class="at">id</span>=<span class="st">"email"</span> <span class="at">name</span>=<span class="st">"email"</span> <span class="at">placeholder</span>=<span class="st">"example@chomthong.ac.th"</span> <span class="at">required</span><span class="tg">&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-phone"</span><span class="tg">&gt;&lt;/i&gt;</span>เบอร์โทรศัพท์<span class="tg">&lt;/label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"tel"</span> <span class="at">id</span>=<span class="st">"phone"</span> <span class="at">name</span>=<span class="st">"phone"</span> <span class="at">placeholder</span>=<span class="st">"เช่น 081-234-5678"</span><span class="tg">&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-venus-mars"</span><span class="tg">&gt;&lt;/i&gt;</span>เพศ<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"radio-group"</span><span class="tg">&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">name</span>=<span class="st">"gender"</span> <span class="at">value</span>=<span class="st">"male"</span><span class="tg">&gt;</span> ชาย<span class="tg">&lt;/label&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">name</span>=<span class="st">"gender"</span> <span class="at">value</span>=<span class="st">"female"</span><span class="tg">&gt;</span> หญิง<span class="tg">&lt;/label&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"radio"</span> <span class="at">name</span>=<span class="st">"gender"</span> <span class="at">value</span>=<span class="st">"other"</span><span class="tg">&gt;</span> ไม่ระบุ<span class="tg">&lt;/label&gt;&lt;/div&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-graduation-cap"</span><span class="tg">&gt;&lt;/i&gt;</span>ระดับชั้น<span class="tg">&lt;/label&gt;&lt;select</span> <span class="at">id</span>=<span class="st">"grade"</span> <span class="at">name</span>=<span class="st">"grade"</span><span class="tg">&gt;&lt;/select&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-door-open"</span><span class="tg">&gt;&lt;/i&gt;</span>ห้องเรียน<span class="tg">&lt;/label&gt;&lt;select</span> <span class="at">id</span>=<span class="st">"room"</span> <span class="at">name</span>=<span class="st">"room"</span><span class="tg">&gt;&lt;/select&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-code"</span><span class="tg">&gt;&lt;/i&gt;</span>ทักษะที่มีอยู่แล้ว<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"checkbox-group"</span><span class="tg">&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"html"</span><span class="tg">&gt;</span> HTML<span class="tg">&lt;/label&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"css"</span><span class="tg">&gt;</span> CSS<span class="tg">&lt;/label&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"js"</span><span class="tg">&gt;</span> JavaScript<span class="tg">&lt;/label&gt;&lt;label&gt;&lt;input</span> <span class="at">type</span>=<span class="st">"checkbox"</span> <span class="at">name</span>=<span class="st">"skill"</span> <span class="at">value</span>=<span class="st">"python"</span><span class="tg">&gt;</span> Python<span class="tg">&lt;/label&gt;&lt;/div&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"field"</span><span class="tg">&gt;&lt;label&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-pen-to-square"</span><span class="tg">&gt;&lt;/i&gt;</span>แนะนำตัวเองและเหตุผลที่อยากเข้าร่วมชมรม<span class="tg">&lt;/label&gt;&lt;textarea</span> <span class="at">id</span>=<span class="st">"bio"</span> <span class="at">name</span>=<span class="st">"bio"</span> <span class="at">rows</span>=<span class="st">"4"</span> <span class="at">placeholder</span>=<span class="st">"เช่น สนใจการเขียนโปรแกรม..."</span><span class="tg">&gt;&lt;/textarea&gt;&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"btn-row"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"submit"</span> <span class="at">id</span>=<span class="st">"submitBtn"</span><span class="tg">&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-paper-plane"</span><span class="tg">&gt;&lt;/i&gt;</span>สมัครเข้าร่วมชมรม<span class="tg">&lt;/button&gt;</span>
+      <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="st">"reset"</span><span class="tg">&gt;&lt;i</span> <span class="at">class</span>=<span class="st">"fa-solid fa-rotate-left"</span><span class="tg">&gt;&lt;/i&gt;</span> ล้างข้อมูล<span class="tg">&lt;/button&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;/form&gt;</span>
+<span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;div</span> <span class="at">id</span>=<span class="st">"toastContainer"</span> <span class="at">class</span>=<span class="st">"toast-container"</span> <span class="at">aria-live</span>=<span class="st">"polite"</span><span class="tg">&gt;&lt;/div&gt;</span>
+<span class="tg">&lt;script&gt;</span>
+  <span class="kw">const</span> form = document.<span class="fn">getElementById</span>(<span class="st">'appForm'</span>);
+  <span class="kw">const</span> submitBtn = document.<span class="fn">getElementById</span>(<span class="st">'submitBtn'</span>);
+  <span class="kw">const</span> toastContainer = document.<span class="fn">getElementById</span>(<span class="st">'toastContainer'</span>);
+  <span class="kw">const</span> submitBtnDefault = submitBtn.innerHTML;
+  <span class="kw">function</span> <span class="fn">fillSelect</span>(el, placeholder, items) {
+    el.innerHTML = <span class="st">'&lt;option value=""&gt;'</span> + placeholder + <span class="st">'&lt;/option&gt;'</span>;
+    items.<span class="fn">forEach</span>(<span class="kw">function</span>(item) { <span class="kw">const</span> opt = document.<span class="fn">createElement</span>(<span class="st">'option'</span>); opt.value = item.value; opt.textContent = item.label; el.<span class="fn">appendChild</span>(opt); });
+  }
+  <span class="fn">fillSelect</span>(document.<span class="fn">getElementById</span>(<span class="st">'grade'</span>), <span class="st">'-- เลือกระดับชั้น --'</span>, [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>].<span class="fn">map</span>(<span class="kw">function</span>(n) { <span class="kw">return</span> { <span class="at">value</span>: <span class="st">'m'</span>+n, <span class="at">label</span>: <span class="st">'ม.'</span>+n }; }));
+  <span class="fn">fillSelect</span>(document.<span class="fn">getElementById</span>(<span class="st">'room'</span>), <span class="st">'-- เลือกห้อง --'</span>, Array.<span class="fn">from</span>({<span class="at">length</span>:<span class="num">13</span>}, <span class="kw">function</span>(_,i) { <span class="kw">const</span> n=i+<span class="num">1</span>; <span class="kw">return</span> {<span class="at">value</span>:<span class="fn">String</span>(n),<span class="at">label</span>:<span class="st">'ห้อง '</span>+n}; }));
+  <span class="kw">function</span> <span class="fn">setButtonLoading</span>(loading) { submitBtn.disabled=loading; submitBtn.innerHTML=loading?<span class="st">'&lt;i class="fa-solid fa-spinner fa-spin"&gt;&lt;/i&gt;กำลังส่งข้อมูล...'</span>:submitBtnDefault; }
+  <span class="kw">function</span> <span class="fn">showToast</span>(type, message) {
+    <span class="kw">const</span> isSuccess=type===<span class="st">'success'</span>; <span class="kw">const</span> toast=document.<span class="fn">createElement</span>(<span class="st">'div'</span>); toast.className=<span class="st">'toast '</span>+type;
+    toast.innerHTML=<span class="st">'&lt;div class="toast-icon"&gt;&lt;i class="fa-solid fa-'</span>+(isSuccess?<span class="st">'circle-check'</span>:<span class="st">'circle-xmark'</span>)+<span class="st">'"&gt;&lt;/i&gt;&lt;/div&gt;&lt;div class="toast-body"&gt;&lt;div class="toast-title"&gt;'</span>+(isSuccess?<span class="st">'สำเร็จ'</span>:<span class="st">'ล้มเหลว'</span>)+<span class="st">'&lt;/div&gt;&lt;div&gt;'</span>+message+<span class="st">'&lt;/div&gt;&lt;/div&gt;&lt;button class="toast-close"&gt;&lt;i class="fa-solid fa-xmark"&gt;&lt;/i&gt;&lt;/button&gt;'</span>;
+    <span class="kw">const</span> close=<span class="kw">function</span>(){ toast.classList.<span class="fn">add</span>(<span class="st">'hide'</span>); <span class="fn">setTimeout</span>(<span class="kw">function</span>(){ toast.<span class="fn">remove</span>(); },<span class="num">300</span>); };
+    toast.<span class="fn">querySelector</span>(<span class="st">'.toast-close'</span>).<span class="fn">addEventListener</span>(<span class="st">'click'</span>,close); toastContainer.<span class="fn">appendChild</span>(toast); <span class="fn">setTimeout</span>(close,<span class="num">4000</span>);
+  }
+  <span class="kw">function</span> <span class="fn">collectFormJson</span>() {
+    <span class="kw">const</span> skills=Array.<span class="fn">from</span>(document.<span class="fn">querySelectorAll</span>(<span class="st">'input[name="skill"]:checked'</span>)).<span class="fn">map</span>(<span class="kw">function</span>(cb){<span class="kw">return</span> cb.value;});
+    <span class="kw">const</span> genderEl=document.<span class="fn">querySelector</span>(<span class="st">'input[name="gender"]:checked'</span>);
+    <span class="kw">return</span> { <span class="at">name</span>:document.<span class="fn">getElementById</span>(<span class="st">'name'</span>).value.<span class="fn">trim</span>(), <span class="at">email</span>:document.<span class="fn">getElementById</span>(<span class="st">'email'</span>).value.<span class="fn">trim</span>(), <span class="at">phone</span>:document.<span class="fn">getElementById</span>(<span class="st">'phone'</span>).value.<span class="fn">trim</span>(), <span class="at">gender</span>:genderEl?genderEl.value:<span class="st">''</span>, <span class="at">grade</span>:document.<span class="fn">getElementById</span>(<span class="st">'grade'</span>).value, <span class="at">room</span>:document.<span class="fn">getElementById</span>(<span class="st">'room'</span>).value, <span class="at">skills</span>:skills, <span class="at">bio</span>:document.<span class="fn">getElementById</span>(<span class="st">'bio'</span>).value.<span class="fn">trim</span>() };
+  }
+  form.<span class="fn">addEventListener</span>(<span class="st">'submit'</span>, <span class="kw">function</span>(e) {
+    e.<span class="fn">preventDefault</span>(); <span class="fn">setButtonLoading</span>(<span class="kw">true</span>);
+    <span class="kw">const</span> payload=<span class="fn">collectFormJson</span>();
+    google.script.run
+      .<span class="fn">withSuccessHandler</span>(<span class="kw">function</span>(res){ <span class="fn">setButtonLoading</span>(<span class="kw">false</span>); <span class="kw">if</span>(res.success){ <span class="fn">showToast</span>(<span class="st">'success'</span>,res.message); form.<span class="fn">reset</span>(); } <span class="kw">else</span> { <span class="fn">showToast</span>(<span class="st">'error'</span>,res.error||<span class="st">'เกิดข้อผิดพลาด'</span>); } })
+      .<span class="fn">withFailureHandler</span>(<span class="kw">function</span>(err){ <span class="fn">setButtonLoading</span>(<span class="kw">false</span>); <span class="fn">showToast</span>(<span class="st">'error'</span>,err.message||<span class="st">'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'</span>); })
+      .<span class="fn">submitApplication</span>(payload);
+  });
+<span class="tg">&lt;/script&gt;</span>
+<span class="tg">&lt;/body&gt;
+&lt;/html&gt;</span></pre>
+    </div>
+  </div>
+
+  <!-- 11 DEPLOY -->
+  <div class="section" id="deploy">
+    <div class="section-title green"><i class="fa-solid fa-rocket" style="color:#16a34a;"></i>9. วิธี Deploy — เผยแพร่เป็น Web App</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>เปิด Google Sheet</strong> → คัดลอก ID จาก URL<br>
+          <code style="font-size:12px;">https://docs.google.com/spreadsheets/d/<span style="background:#fde68a;padding:0 4px;border-radius:3px;">ID_ตรงนี้</span>/edit</code><br>
+          → วางใน <code>SPREADSHEET_ID</code> ใน code.gs
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>สร้าง Google Apps Script Project</strong><br>
+          ใน Google Drive → New → More → Google Apps Script<br>
+          วางโค้ด code.gs → บันทึก (Ctrl+S)
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>สร้างไฟล์ HTML</strong><br>
+          ใน Script Editor → กด <code>+</code> → HTML → ตั้งชื่อ <strong>index</strong> (ห้ามมี .html)<br>
+          วางโค้ด index.html → บันทึก
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>รัน <code>setupSheet()</code></strong><br>
+          เลือกฟังก์ชัน <code>setupSheet</code> → กด ▶ Run → เลือกบัญชี Google<br>
+          ตรวจชื่อ Project → อนุญาตสิทธิ์เข้าถึง Spreadsheet → กลับมาดู Execution log<br>
+          → ไปดู Google Sheet และตรวจว่ามีแท็บ <code>Applications</code> พร้อม header แถวแรก
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Deploy เป็น Web App</strong><br>
+          Deploy → New deployment → Web app<br>
+          Execute as: <strong>Me</strong> | Who has access: <strong>Anyone</strong><br>
+          → Copy URL ที่ได้ → เปิดในบราวเซอร์ได้เลย
+        </div>
+      </div>
+    </div>
+
+    <div class="note warn" style="margin-top:16px;"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i><strong>เมื่อแก้ code.gs หรือ index.html:</strong> URL สำหรับใช้งานจริงที่ลงท้ายด้วย <code>/exec</code> จะยังใช้ Version เดิม ต้องไปที่ Deploy → Manage deployments → Edit → เลือก New version → Deploy จึงจะเห็นโค้ดใหม่โดยใช้ URL เดิม</div>
+    <div class="note info"><i class="fa-solid fa-circle-info" style="color:#2563eb;"></i><strong>URL ทดสอบกับ URL ใช้งานจริง:</strong> Test deployment ที่ลงท้ายด้วย <code>/dev</code> ใช้โค้ดที่บันทึกล่าสุดและเปิดได้เฉพาะผู้มีสิทธิ์แก้ Script ส่วน URL <code>/exec</code> ใช้ Version ที่ Deploy แล้วและใช้แจกให้ผู้ใช้จริง</div>
+
+    <p style="font-weight:700; margin-top:20px;">Checklist ก่อนส่ง URL ให้นักเรียนทดสอบ</p>
+    <ul>
+      <li>เปลี่ยน <code>SPREADSHEET_ID</code> เป็น ID ของ Google Sheets ของคุณแล้ว</li>
+      <li>ตรวจค่า <code>SHEET_NAME</code> และสร้างไฟล์ HTML ชื่อ <code>index</code> แล้ว</li>
+      <li>ตั้ง Time zone ใน Project Settings เป็น <code>Asia/Bangkok</code></li>
+      <li>รัน <code>setupSheet()</code> สำเร็จและเห็น header ใน Sheet</li>
+      <li>ทดสอบส่งข้อมูลอย่างน้อย 1 รายการผ่าน <code>/dev</code></li>
+      <li>Deploy Version ล่าสุด แล้วทดสอบซ้ำผ่าน URL <code>/exec</code></li>
+      <li>ตรวจว่าข้อมูลถูกบันทึกครบทุกคอลัมน์ใน Google Sheets</li>
+    </ul>
+  </div>
+
+  <!-- 12 TROUBLESHOOTING -->
+  <div class="section" id="troubleshooting">
+    <div class="section-title amber"><i class="fa-solid fa-circle-exclamation" style="color:#d97706;"></i>10. ข้อผิดพลาดที่พบบ่อยและวิธีตรวจสอบ</div>
+
+    <table class="tbl">
+      <tr><th>อาการ / ข้อความ</th><th>สาเหตุที่พบบ่อย</th><th>วิธีแก้</th></tr>
+      <tr><td><code>กรุณาเปลี่ยน SPREADSHEET_ID...</code></td><td>ยังใช้ข้อความตัวอย่างแทน Sheet ID จริง</td><td>คัดลอกค่าระหว่าง <code>/d/</code> และ <code>/edit</code> จาก URL ของ Google Sheets</td></tr>
+      <tr><td><code>Unexpected error while getting openById</code></td><td>Sheet ID ผิด หรือบัญชีเจ้าของ Script ไม่มีสิทธิ์เปิดไฟล์</td><td>ตรวจ ID และเปิด Google Sheets ด้วยบัญชีเดียวกับที่ Deploy</td></tr>
+      <tr><td><code>Cannot find file index</code></td><td>ไม่มีไฟล์ HTML ชื่อ <code>index</code> หรือสะกดไม่ตรง</td><td>สร้างไฟล์ HTML ชื่อ <code>index</code> โดยไม่ต้องพิมพ์นามสกุล</td></tr>
+      <tr><td>หน้าเว็บยังเป็นโค้ดเก่า</td><td>เปิด URL <code>/exec</code> ที่ยังชี้ไป Version เดิม</td><td>อัปเดต Deployment ให้ใช้ New version แล้ว Refresh หน้า</td></tr>
+      <tr><td>ส่งข้อมูลแล้วขึ้น Permission error</td><td>ยังไม่ได้อนุญาตสิทธิ์ หรือ Execute as ตั้งค่าไม่เหมาะสม</td><td>รัน <code>setupSheet()</code> เพื่ออนุญาตสิทธิ์ และตรวจว่า Execute as เป็น <strong>Me</strong></td></tr>
+      <tr><td>บันทึกสำเร็จแต่หาแถวไม่พบ</td><td>Sheet ID หรือ <code>SHEET_NAME</code> ชี้ไปคนละไฟล์/คนละแท็บ</td><td>ตรวจค่าคงที่ทั้งสองตัวและดูแท็บ <code>Applications</code></td></tr>
+    </table>
+
+    <div class="note info"><i class="fa-solid fa-magnifying-glass" style="color:#2563eb;"></i><strong>จุดตรวจสอบหลัก:</strong> ใน Apps Script เปิดเมนู Executions เพื่อดูว่าฟังก์ชันใดทำงาน เวลาใด สำเร็จหรือผิดพลาด และอ่านข้อความ Error ฉบับเต็ม</div>
+  </div>
+
+  <!-- 13 LIMITATIONS -->
+  <div class="section" id="limitations">
+    <div class="section-title"><i class="fa-solid fa-scale-balanced"></i>11. ขอบเขตการใช้งานและข้อจำกัด</div>
+    <p>ตัวอย่างนี้เหมาะสำหรับการเรียน การเก็บแบบฟอร์ม และระบบภายในที่มีผู้ใช้ไม่มาก Google Sheets ช่วยให้เปิดดูและแก้ข้อมูลได้ง่าย แต่ไม่ใช่ฐานข้อมูลสำหรับงานที่ต้องรองรับปริมาณข้อมูลหรือคำขอจำนวนมากมาก</p>
+    <ul>
+      <li>Google Apps Script และบริการ Google มีโควตาการใช้งาน ซึ่งแตกต่างตามประเภทบัญชีและอาจมีการเปลี่ยนแปลง</li>
+      <li>ไม่ควรเก็บรหัสผ่าน เลขบัตรประชาชน หรือข้อมูลอ่อนไหวโดยไม่มีมาตรการรักษาความปลอดภัยและสิทธิ์เข้าถึงที่เหมาะสม</li>
+      <li>การตั้ง Who has access เป็น <strong>Anyone</strong> หมายถึงทุกคนที่มี URL สามารถเปิดฟอร์มได้ ควรแจก URL เฉพาะกลุ่มที่ต้องการ</li>
+      <li>หากระบบโตขึ้น ควรพิจารณาฐานข้อมูลจริง ระบบยืนยันตัวตน และการสำรองข้อมูล</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer><i class="fa-solid fa-school"></i>เอกสารประกอบการเรียน — วิชาการพัฒนาเว็บแอปสมัยใหม่ โรงเรียนจอมทอง</footer>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre.code-block');
+    const text = pre ? pre.innerText : '';
+    navigator.clipboard.writeText(text).then(function() {
+      btn.classList.add('copied');
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> คัดลอกแล้ว';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i> คัดลอก';
+      }, 2000);
+    }).catch(function() {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      btn.classList.add('copied');
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> คัดลอกแล้ว';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i> คัดลอก';
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
